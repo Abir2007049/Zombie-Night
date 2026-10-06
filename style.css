@@ -575,7 +575,55 @@ html, body {
     to { transform: rotate(360deg); }
 }
 
-/* Mobile Virtual Controls (Mini Militia Style Dual Joysticks & Elevated Screen Fit) */
+/* Landscape Mode Prompt for Mobile Devices in Portrait */
+.landscape-prompt-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(5, 7, 12, 0.96);
+    z-index: 9999;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    text-align: center;
+    padding: 2rem;
+    backdrop-filter: blur(12px);
+}
+
+@media (max-width: 900px) and (orientation: portrait) {
+    .landscape-prompt-overlay {
+        display: flex;
+    }
+}
+
+.rotate-icon {
+    font-size: 3.5rem;
+    animation: rotatePulse 2s infinite ease-in-out;
+}
+
+@keyframes rotatePulse {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(90deg) scale(1.1); }
+}
+
+.landscape-prompt-overlay h2 {
+    font-family: var(--font-heading);
+    color: var(--color-primary);
+    font-size: 1.6rem;
+    letter-spacing: 2px;
+}
+
+.landscape-prompt-overlay p {
+    color: var(--color-text-muted);
+    font-size: 1rem;
+    max-width: 320px;
+}
+
+/* Mobile Virtual Controls (Mini Militia Style Dual Joysticks on Opposite Sides) */
 .mobile-controls-container {
     position: absolute;
     top: 0;
@@ -602,14 +650,14 @@ html, body {
 
 .move-zone {
     position: absolute;
-    bottom: 50px;
-    left: 25px;
+    bottom: 35px;
+    left: 35px;
 }
 
 .mobile-right-cluster {
     position: absolute;
-    bottom: 50px;
-    right: 25px;
+    bottom: 35px;
+    right: 35px;
     display: flex;
     flex-direction: column;
     align-items: flex-end;

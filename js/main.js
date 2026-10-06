@@ -78,6 +78,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-play').addEventListener('click', () => {
         audioManager.playMenuClick();
         audioManager.ensureContext();
+
+        // Attempt Landscape Orientation Lock on Mobile Devices
+        if (window.screen && window.screen.orientation && window.screen.orientation.lock) {
+            window.screen.orientation.lock('landscape').catch(() => {});
+        }
+
         mainMenuScreen.classList.remove('active');
         gameContainerScreen.classList.add('active');
         game.startNewGame();
