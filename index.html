@@ -147,20 +147,29 @@
                 <!-- Notifications Center -->
                 <div id="hud-notifications" class="hud-notifications"></div>
 
-                <!-- Mobile Virtual Controls -->
+                <!-- Mobile Virtual Controls (Mini Militia Twin-Stick Aim & Shoot Style) -->
                 <div id="mobile-controls" class="mobile-controls-container">
-                    <!-- Left Joystick Zone -->
-                    <div id="joystick-move" class="joystick-zone">
+                    <!-- Left Movement Joystick Zone -->
+                    <div id="joystick-move" class="joystick-zone move-zone">
                         <div class="joystick-base">
-                            <div class="joystick-stick"></div>
+                            <span class="joystick-label">MOVE</span>
+                            <div class="joystick-stick stick-move"></div>
                         </div>
                     </div>
 
-                    <!-- Right Action Zone -->
-                    <div id="mobile-action-zone" class="mobile-action-zone">
-                        <button id="btn-mobile-shoot" class="mobile-btn btn-shoot">🔫<br>SHOOT</button>
-                        <button id="btn-mobile-reload" class="mobile-btn btn-reload">🔄<br>RELOAD</button>
-                        <button id="btn-mobile-dash" class="mobile-btn btn-dash">⚡<br>DASH</button>
+                    <!-- Right Aim & Shoot Joystick Zone + Action Cluster -->
+                    <div class="mobile-right-cluster">
+                        <div class="mobile-action-buttons">
+                            <button id="btn-mobile-reload" class="mobile-btn btn-reload" title="Reload">🔄<br>RELOAD</button>
+                            <button id="btn-mobile-dash" class="mobile-btn btn-dash" title="Dash">⚡<br>DASH</button>
+                        </div>
+                        
+                        <div id="joystick-aim" class="joystick-zone aim-zone">
+                            <div class="joystick-base joystick-base-aim">
+                                <span class="joystick-label label-aim">AIM & SHOOT</span>
+                                <div class="joystick-stick stick-aim"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

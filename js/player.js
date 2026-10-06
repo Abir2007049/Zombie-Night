@@ -66,8 +66,11 @@ class Player {
 
         // 1. Calculate Aim Angle
         if (mobileController.isTouchDevice) {
-            // Auto-aim or movement aiming on mobile
-            if (mobileController.moveVector.magnitude > 0.1) {
+            if (mobileController.aimVector && mobileController.aimVector.active) {
+                // Aim directly in direction of Right Aim & Shoot Stick (Mini Militia Style)
+                this.angle = mobileController.aimVector.angle;
+            } else if (mobileController.moveVector.magnitude > 0.1) {
+                // Fallback to facing movement direction when left stick is moved
                 this.angle = Math.atan2(mobileController.moveVector.dy, mobileController.moveVector.dx);
             }
         } else {
