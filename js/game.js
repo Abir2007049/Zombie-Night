@@ -426,38 +426,213 @@ class Game {
     // 2D Canvas Darkness Overlay & Illumination Cone
     renderDarknessOverlay(ctx, cam) {
         const alpha = this.waveManager.darknessAlpha;
-        if (alpha <= 0.02) return; // Full daylight
 
-        // Offscreen darkness buffer blending
+        // Daytime - no darkness
+        if (alpha <= 0.02) return;
+
         ctx.save();
-        ctx.fillStyle = this.waveManager.activeEvent === 'BLOOD_MOON'
-            ? `rgba(40, 0, 10, ${alpha})`
-            : `rgba(4, 6, 12, ${alpha})`;
-        ctx.fillRect(0, 0, cam.width, cam.height);
 
-        // Cut out light source illumination (Player flashlight & Streetlights)
-        ctx.globalCompositeOperation = 'destination-out';
+        /*
+         * =========================================================
+         * 1. DARK NIGHT OVERLAY
+         * =========================================================
+         */
 
-        // 1. Cut out Flashlight Cone
-        if (this.player.health > 0) {
-            this.player.renderFlashlight(ctx, cam, alpha);
+        if (this.waveManager.activeEvent === 'BLOOD_MOON') {
+            ctx.fillStyle = `rgba(55, 0, 10, ${alpha})`;
+        } else {
+            ctx.fillStyle = `rgba(3, 6, 14, ${alpha})`;
         }
 
-        // 2. Cut out Street Light Pools
+        ctx.fillRect(0, 0, cam.width, cam.height);
+
+
+        /*
+         * =========================================================
+         * 2. PLAYER FLASHLIGHT
+         * =========================================================
+         */
+
+        if (this.player.health > 0) {
+
+            const playerX = this.player.x - cam.x;
+            const playerY = this.player.y - cam.y;
+
+            // Small random flicker
+            const flicker =
+                1 + (Math.random() - 0.5) * 0.08;
+
+            const flashlightLength = 380 * flicker;
+            const flashlightWidth = 80 * flicker;
+
+            ctx.save();
+
+            ctx.translate(playerX, playerY);
+            ctx.rotate(this.player.angle);
+
+            /*
+             * Bright flashlight beam
+             */
+            const beamGradient = ctx.createLinearGradient(
+                0,
+                0,
+                flashlightLength,
+                0
+            );
+
+            beamGradient.addColorStop(
+                0,
+                'rgba(255,255,220,0.55)'
+            );
+
+            beamGradient.addColorStop(
+                0.25,
+                'rgba(255,245,200,0.30)'
+            );
+
+            beamGradient.addColorStop(
+                0.65,
+                'rgba(255,235,180,0.10)'
+            );
+
+            beamGradient.addColorStop(
+                1,
+                'rgba(255,225,150,0)'
+            );
+
+            ctx.fillStyle = beamGradient;
+
+            ctx.beginPath();
+
+            ctx.moveTo(0, -15);
+
+            ctx.quadraticCurveTo(
+                flashlightLength * 0.45,
+                -flashlightWidth,
+                flashlightLength,
+                -flashlightWidth * 0.35
+            );
+
+            ctx.quadraticCurveTo(
+                flashlightLength * 0.8,
+                0,
+                flashlightLength,
+                flashlightWidth * 0.35
+            );
+
+            ctx.quadraticCurveTo(
+                flashlightLength * 0.45,
+                flashlightWidth,
+                0,
+                15
+            );
+
+            ctx.closePath();
+
+            ctx.fill();
+
+
+            /*
+             * Bright area around player
+             */
+            const playerGlow = ctx.createRadialGradient(
+                0,
+                0,
+                5,
+                0,
+                0,
+                85 * flicker
+            );
+
+            playerGlow.addColorStop(
+                0,
+                'rgba(255,255,230,0.65)'
+            );
+
+            playerGlow.addColorStop(
+                0.45,
+                'rgba(255,245,210,0.25)'
+            );
+
+            playerGlow.addColorStop(
+                1,
+                'rgba(255,235,180,0)'
+            );
+
+            ctx.fillStyle = playerGlow;
+
+            ctx.beginPath();
+            ctx.arc(
+                0,
+                0,
+                85 * flicker,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+
+        /*
+         * =========================================================
+         * 3. STREET LIGHTS
+         * =========================================================
+         */
+
         for (let i = 0; i < this.streetLights.length; i++) {
+
             const sl = this.streetLights[i];
+
             const screenX = sl.x - cam.x;
             const screenY = sl.y - cam.y;
 
-            if (screenX < -200 || screenX > cam.width + 200 || screenY < -200 || screenY > cam.height + 200) continue;
+            if (
+                screenX < -sl.radius ||
+                screenX > cam.width + sl.radius ||
+                screenY < -sl.radius ||
+                screenY > cam.height + sl.radius
+            ) {
+                continue;
+            }
 
-            const grad = ctx.createRadialGradient(screenX, screenY, 10, screenX, screenY, sl.radius);
-            grad.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
-            grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            const glow = ctx.createRadialGradient(
+                screenX,
+                screenY,
+                5,
+                screenX,
+                screenY,
+                sl.radius
+            );
 
-            ctx.fillStyle = grad;
+            glow.addColorStop(
+                0,
+                'rgba(255,220,120,0.45)'
+            );
+
+            glow.addColorStop(
+                0.35,
+                'rgba(255,210,100,0.18)'
+            );
+
+            glow.addColorStop(
+                1,
+                'rgba(255,190,80,0)'
+            );
+
+            ctx.fillStyle = glow;
+
             ctx.beginPath();
-            ctx.arc(screenX, screenY, sl.radius, 0, Math.PI * 2);
+
+            ctx.arc(
+                screenX,
+                screenY,
+                sl.radius,
+                0,
+                Math.PI * 2
+            );
+
             ctx.fill();
         }
 
