@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Zombie Night - Top-Down Survival</title>
+    <meta name="description" content="Survive the night against endless zombie hordes in this high-octane top-down survival game. Upgrade weapons, unleash special abilities, and endure until dawn!">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Style Sheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Background Canvas for Menu Effects -->
+    <canvas id="menu-bg-canvas"></canvas>
+
+    <!-- App Container -->
+    <div id="app">
+        <!-- MAIN MENU -->
+        <div id="main-menu" class="screen active">
+            <div class="menu-content">
+                <div class="game-title-container">
+                    <h1 class="game-title">ZOMBIE NIGHT</h1>
+                    <div class="game-subtitle">SURVIVE UNTIL DAWN</div>
+                </div>
+
+                <div class="menu-buttons">
+                    <button id="btn-play" class="btn btn-primary btn-glow">
+                        <span class="btn-icon">▶</span> PLAY GAME
+                    </button>
+                    <button id="btn-upgrades-menu" class="btn btn-secondary">
+                        <span class="btn-icon">⚡</span> PERMANENT UPGRADES
+                    </button>
+                    <button id="btn-highscores" class="btn btn-secondary">
+                        <span class="btn-icon">🏆</span> HIGH SCORES
+                    </button>
+                    <button id="btn-howtoplay" class="btn btn-secondary">
+                        <span class="btn-icon">❓</span> HOW TO PLAY
+                    </button>
+                    <button id="btn-settings" class="btn btn-secondary">
+                        <span class="btn-icon">⚙</span> SETTINGS
+                    </button>
+                </div>
+
+                <div class="menu-footer">
+                    <div class="footer-stats">
+                        <span>Total Coins: <strong id="menu-total-coins">0</strong> 🪙</span> | 
+                        <span>Best Wave: <strong id="menu-best-wave">0</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GAME CANVAS & HUD CONTAINER -->
+        <div id="game-container" class="screen">
+            <!-- Main Gameplay Canvas -->
+            <canvas id="game-canvas"></canvas>
+
+            <!-- Gameplay HUD Overlay -->
+            <div id="hud">
+                <!-- Top Status Bar -->
+                <div class="hud-top">
+                    <div class="hud-group player-stats-group">
+                        <div class="hud-card health-card">
+                            <div class="card-icon">❤️</div>
+                            <div class="bar-container">
+                                <div id="hud-health-bar" class="bar-fill health-bar-fill" style="width: 100%;"></div>
+                                <span id="hud-health-text" class="bar-text">100 / 100</span>
+                            </div>
+                        </div>
+
+                        <div class="hud-card ammo-card">
+                            <div class="card-icon">🔫</div>
+                            <div class="ammo-info">
+                                <span id="hud-weapon-name" class="weapon-name">PISTOL</span>
+                                <div class="ammo-numbers">
+                                    <span id="hud-ammo-current">12</span> / <span id="hud-ammo-reserve">60</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hud-group center-stats-group">
+                        <div class="wave-display-card">
+                            <div id="hud-wave-title" class="wave-title">WAVE 1</div>
+                            <div id="hud-cycle-display" class="cycle-display">☀️ DAYTIME</div>
+                            <div class="zombies-count">Zombies: <span id="hud-zombies-left">0</span></div>
+                        </div>
+                    </div>
+
+                    <div class="hud-group right-stats-group">
+                        <div class="hud-card coin-card">
+                            <span class="card-icon">🪙</span>
+                            <span id="hud-coins" class="coin-count">0</span>
+                        </div>
+                        <div class="hud-card score-card">
+                            <span class="score-label">SCORE</span>
+                            <span id="hud-score" class="score-value">0</span>
+                        </div>
+                        <button id="btn-pause-hud" class="hud-btn-pause" title="Pause Game (ESC)">⏸</button>
+                    </div>
+                </div>
+
+                <!-- Active Event Banner -->
+                <div id="hud-event-banner" class="hud-event-banner hidden">
+                    <span id="hud-event-text">⚠️ HORDE INCOMING!</span>
+                </div>
+
+                <!-- Active Weapon Quick Slots -->
+                <div class="hud-bottom-weapons" id="hud-weapon-slots">
+                    <div class="weapon-slot active" data-slot="0" title="Pistol (1)">
+                        <span class="slot-num">1</span>
+                        <span class="slot-name">Pistol</span>
+                    </div>
+                    <div class="weapon-slot locked" data-slot="1" title="Shotgun (2)">
+                        <span class="slot-num">2</span>
+                        <span class="slot-name">Shotgun</span>
+                    </div>
+                    <div class="weapon-slot locked" data-slot="2" title="SMG (3)">
+                        <span class="slot-num">3</span>
+                        <span class="slot-name">SMG</span>
+                    </div>
+                    <div class="weapon-slot locked" data-slot="3" title="Rifle (4)">
+                        <span class="slot-num">4</span>
+                        <span class="slot-name">Rifle</span>
+                    </div>
+                </div>
+
+                <!-- Boss Health Bar Overlay -->
+                <div id="hud-boss-bar-container" class="boss-bar-container hidden">
+                    <div class="boss-name" id="hud-boss-name">TITAN ZOMBIE</div>
+                    <div class="boss-bar-outer">
+                        <div id="hud-boss-health-bar" class="boss-bar-fill" style="width: 100%;"></div>
+                    </div>
+                </div>
+
+                <!-- Reload Progress Popup -->
+                <div id="hud-reload-indicator" class="hud-reload-indicator hidden">
+                    <div class="reload-spinner"></div>
+                    <span>RELOADING...</span>
+                </div>
+
+                <!-- Notifications Center -->
+                <div id="hud-notifications" class="hud-notifications"></div>
+
+                <!-- Mobile Virtual Controls -->
+                <div id="mobile-controls" class="mobile-controls-container">
+                    <!-- Left Joystick Zone -->
+                    <div id="joystick-move" class="joystick-zone">
+                        <div class="joystick-base">
+                            <div class="joystick-stick"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right Action Zone -->
+                    <div id="mobile-action-zone" class="mobile-action-zone">
+                        <button id="btn-mobile-shoot" class="mobile-btn btn-shoot">🔫<br>SHOOT</button>
+                        <button id="btn-mobile-reload" class="mobile-btn btn-reload">🔄<br>RELOAD</button>
+                        <button id="btn-mobile-dash" class="mobile-btn btn-dash">⚡<br>DASH</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UPGRADE / SHOP SCREEN (Between Waves / Pause) -->
+        <div id="upgrade-modal" class="modal-overlay hidden">
+            <div class="modal-box upgrade-box">
+                <div class="modal-header">
+                    <h2>ARMORY & UPGRADES</h2>
+                    <div class="user-coin-badge">Coins: <span id="shop-coins">0</span> 🪙</div>
+                </div>
+
+                <!-- Tabs: Character Upgrades & Weapons Store -->
+                <div class="shop-tabs">
+                    <button class="shop-tab-btn active" data-tab="tab-player-upgrades">Attributes</button>
+                    <button class="shop-tab-btn" data-tab="tab-weapons">Weapons</button>
+                </div>
+
+                <div class="modal-body shop-body">
+                    <!-- Tab 1: Attributes -->
+                    <div id="tab-player-upgrades" class="shop-tab-content active">
+                        <div class="upgrades-grid" id="upgrades-container">
+                            <!-- Dynamically Generated -->
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Weapons -->
+                    <div id="tab-weapons" class="shop-tab-content">
+                        <div class="weapons-grid" id="weapons-container">
+                            <!-- Dynamically Generated -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button id="btn-start-next-wave" class="btn btn-primary btn-glow">
+                        START NEXT WAVE ▶
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAUSE MENU MODAL -->
+        <div id="pause-modal" class="modal-overlay hidden">
+            <div class="modal-box pause-box">
+                <h2>GAME PAUSED</h2>
+                <div class="pause-menu-buttons">
+                    <button id="btn-resume" class="btn btn-primary">▶ RESUME</button>
+                    <button id="btn-pause-upgrades" class="btn btn-secondary">⚡ ARMORY / SHOP</button>
+                    <button id="btn-pause-settings" class="btn btn-secondary">⚙ SETTINGS</button>
+                    <button id="btn-exit-main-menu" class="btn btn-danger">🚪 EXIT TO MAIN MENU</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- GAME OVER MODAL -->
+        <div id="gameover-modal" class="modal-overlay hidden">
+            <div class="modal-box gameover-box">
+                <h1 class="gameover-title">YOU DIED</h1>
+                <p class="gameover-subtitle">The horde overwhelmed your defenses.</p>
+
+                <div class="gameover-stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-label">NIGHTS SURVIVED</span>
+                        <span id="go-nights" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">WAVES CLEARED</span>
+                        <span id="go-waves" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">ZOMBIES KILLED</span>
+                        <span id="go-kills" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">COINS EARNED</span>
+                        <span id="go-coins" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-card full-width">
+                        <span class="stat-label">TOTAL SCORE</span>
+                        <span id="go-score" class="stat-value highlight">0</span>
+                    </div>
+                </div>
+
+                <div id="go-new-highscore" class="new-record-badge hidden">🎉 NEW HIGH SCORE! 🎉</div>
+
+                <div class="modal-footer modal-footer-centered">
+                    <button id="btn-restart" class="btn btn-primary btn-glow">▶ PLAY AGAIN</button>
+                    <button id="btn-gameover-menu" class="btn btn-secondary">⌂ MAIN MENU</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SETTINGS MODAL -->
+        <div id="settings-modal" class="modal-overlay hidden">
+            <div class="modal-box settings-box">
+                <div class="modal-header">
+                    <h2>SETTINGS</h2>
+                    <button class="modal-close-btn" id="btn-close-settings">✕</button>
+                </div>
+                <div class="modal-body settings-body">
+                    <div class="setting-row">
+                        <label for="setting-sound">Sound Effects (SFX)</label>
+                        <input type="checkbox" id="setting-sound" checked>
+                    </div>
+                    <div class="setting-row">
+                        <label for="setting-music">Background Music</label>
+                        <input type="checkbox" id="setting-music" checked>
+                    </div>
+                    <div class="setting-row">
+                        <label for="setting-volume">Master Volume</label>
+                        <input type="range" id="setting-volume" min="0" max="100" value="80">
+                    </div>
+                    <div class="setting-row">
+                        <label for="setting-screenshake">Screen Shake</label>
+                        <input type="checkbox" id="setting-screenshake" checked>
+                    </div>
+                    <div class="setting-row">
+                        <label for="setting-autoaim">Mobile Auto-Aim</label>
+                        <input type="checkbox" id="setting-autoaim" checked>
+                    </div>
+                    <div class="setting-row">
+                        <button id="btn-reset-data" class="btn btn-danger-small">Reset All Save Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HIGH SCORES MODAL -->
+        <div id="highscores-modal" class="modal-overlay hidden">
+            <div class="modal-box highscores-box">
+                <div class="modal-header">
+                    <h2>🏆 LEADERBOARD</h2>
+                    <button class="modal-close-btn" id="btn-close-highscores">✕</button>
+                </div>
+                <div class="modal-body">
+                    <table class="highscores-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Score</th>
+                                <th>Wave</th>
+                                <th>Kills</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="highscores-list">
+                            <!-- Dynamically loaded -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- HOW TO PLAY MODAL -->
+        <div id="howtoplay-modal" class="modal-overlay hidden">
+            <div class="modal-box howtoplay-box">
+                <div class="modal-header">
+                    <h2>HOW TO PLAY</h2>
+                    <button class="modal-close-btn" id="btn-close-howtoplay">✕</button>
+                </div>
+                <div class="modal-body howtoplay-body">
+                    <div class="help-section">
+                        <h3>🖥 Desktop Controls</h3>
+                        <ul>
+                            <li><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> or Arrow Keys — Move Character</li>
+                            <li><kbd>Mouse Cursor</kbd> — Aim</li>
+                            <li><kbd>Left Click</kbd> — Shoot</li>
+                            <li><kbd>R</kbd> — Reload Weapon</li>
+                            <li><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd> — Switch Weapon</li>
+                            <li><kbd>Spacebar</kbd> — Quick Dash</li>
+                            <li><kbd>ESC</kbd> or <kbd>P</kbd> — Pause Game</li>
+                        </ul>
+                    </div>
+                    <div class="help-section">
+                        <h3>📱 Mobile Controls</h3>
+                        <ul>
+                            <li><strong>Left Virtual Joystick</strong> — Drag to Move</li>
+                            <li><strong>Right Shoot Button</strong> — Hold or Tap to Fire</li>
+                            <li><strong>Reload / Dash Buttons</strong> — Quick Action Buttons</li>
+                        </ul>
+                    </div>
+                    <div class="help-section">
+                        <h3>🧟 Gameplay Tips</h3>
+                        <ul>
+                            <li>Survive as many waves & nights as possible!</li>
+                            <li>Night fall increases zombie speed and spawn rates. Flashlight visibility is vital.</li>
+                            <li>Collect coins dropped by zombies or found in crate drops to purchase weapons and permanent stat upgrades.</li>
+                            <li>Watch out for dangerous <strong>Tank</strong> and <strong>Boss Zombies</strong>!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/input.js"></script>
+    <script src="js/mobileControls.js"></script>
+    <script src="js/collision.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/bullet.js"></script>
+    <script src="js/weapon.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/zombie.js"></script>
+    <script src="js/upgrades.js"></script>
+    <script src="js/waveManager.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
